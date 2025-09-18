@@ -71,7 +71,7 @@ class Settings:
     
     @property
     def groq_voice(self) -> str:
-        return self.get('TTS_GROQ_VOICE', 'Fritz-PlayAI')
+        return self.get('TTS_GROQ_VOICE', 'Indigo-PlayAI')
     
     @property
     def max_concurrent_connections(self) -> int:
@@ -87,7 +87,7 @@ class Settings:
     
     @property
     def chunk_size_words(self) -> int:
-        return int(self.get('TTS_CHUNK_SIZE_WORDS', 15))
+        return int(self.get('TTS_CHUNK_SIZE_WORDS', 8))
     
     # Legacy properties for backward compatibility
     @property

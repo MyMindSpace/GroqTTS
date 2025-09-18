@@ -122,6 +122,57 @@ class AudioGenerator:
                     import base64
                     audio_base64 = base64.b64encode(audio_data).decode('utf-8')
                     
+                    # Check if the base64 encoded audio exceeds WebSocket message size limit (1MB)
+                    # Base64 encoding increases size by ~33%, so we check against 750KB raw audio
+                    if len(audio_data) > 750000:  # 750KB limit for raw audio
+                        logger.warning(f"Audio chunk {chunk_id} is too large ({len(audio_data)} bytes), splitting further...")
+                        # Split the chunk further by words
+                        words = chunk.split()
+                        if len(words) > 3:
+                            # Split into two smaller chunks
+                            mid_point = len(words) // 2
+                            chunk1 = ' '.join(words[:mid_point])
+                            chunk2 = ' '.join(words[mid_point:])
+                            
+                            # Process first sub-chunk
+                            try:
+                                sub_audio1 = await tts_model.generate_audio(text=chunk1, voice=voice, **parameters)
+                                if len(sub_audio1) <= 750000:
+                                    sub_audio_base64_1 = base64.b64encode(sub_audio1).decode('utf-8')
+                                    yield {
+                                        "type": "audio_chunk",
+                                        "data": {
+                                            "chunk_id": chunk_id,
+                                            "total_chunks": total_chunks,
+                                            "text_chunk": chunk1,
+                                            "audio_data": sub_audio_base64_1,
+                                            "sample_rate": settings.sample_rate,
+                                            "is_final": False,
+                                            "audio_length_seconds": len(chunk1.split()) * 0.6
+                                        }
+                                    }
+                                
+                                # Process second sub-chunk
+                                sub_audio2 = await tts_model.generate_audio(text=chunk2, voice=voice, **parameters)
+                                if len(sub_audio2) <= 750000:
+                                    sub_audio_base64_2 = base64.b64encode(sub_audio2).decode('utf-8')
+                                    yield {
+                                        "type": "audio_chunk",
+                                        "data": {
+                                            "chunk_id": chunk_id,
+                                            "total_chunks": total_chunks,
+                                            "text_chunk": chunk2,
+                                            "audio_data": sub_audio_base64_2,
+                                            "sample_rate": settings.sample_rate,
+                                            "is_final": chunk_id == total_chunks,
+                                            "audio_length_seconds": len(chunk2.split()) * 0.6
+                                        }
+                                    }
+                                continue
+                            except Exception as e:
+                                logger.error(f"Failed to split large chunk: {e}")
+                                # Fall through to error handling
+                    
                     # Estimate audio length (rough approximation for Groq)
                     # Groq returns WAV files, so we estimate based on typical speech rates
                     estimated_length = len(chunk.split()) * 0.6  # ~0.6 seconds per word

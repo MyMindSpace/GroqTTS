@@ -21,7 +21,7 @@ class TextProcessor:
         ]
         
         # Maximum tokens per chunk (approximate) - optimized for real-time streaming
-        self.max_chunk_tokens = 75  # Further reduced for faster generation
+        self.max_chunk_tokens = 40  # Further reduced for smaller audio chunks
         
         # Minimum chunk length
         self.min_chunk_length = 3  # Further reduced for more responsive streaming
@@ -182,13 +182,13 @@ class TextProcessor:
         
         return cleaned_text, chunks
     
-    def create_micro_chunks(self, text: str, words_per_chunk: int = 15) -> List[str]:
+    def create_micro_chunks(self, text: str, words_per_chunk: int = 8) -> List[str]:
         """
         Create micro-chunks for faster Groq API responses.
         
         Args:
             text: Input text
-            words_per_chunk: Number of words per chunk (default: 15 for faster responses)
+            words_per_chunk: Number of words per chunk (default: 8 for smaller audio files)
             
         Returns:
             List of micro-chunks
