@@ -56,8 +56,8 @@ class GroqTTSModel:
         self.local_tokenizer = None
         self.use_groq = settings.use_groq
         
-        # Available Groq voices
-        self.english_voices = [
+        # Available Groq voices for PlayAI models
+        self.playai_english_voices = [
             "Arista-PlayAI", "Atlas-PlayAI", "Basil-PlayAI", "Briggs-PlayAI",
             "Calum-PlayAI", "Celeste-PlayAI", "Cheyenne-PlayAI", "Chip-PlayAI",
             "Cillian-PlayAI", "Deedee-PlayAI", "Fritz-PlayAI", "Gail-PlayAI",
@@ -65,8 +65,13 @@ class GroqTTSModel:
             "Mitch-PlayAI", "Quinn-PlayAI", "Thunder-PlayAI"
         ]
         
-        self.arabic_voices = [
+        self.playai_arabic_voices = [
             "Ahmad-PlayAI", "Amira-PlayAI", "Khalid-PlayAI", "Nasser-PlayAI"
+        ]
+        
+        # Available voices for Orpheus models
+        self.orpheus_voices = [
+            "autumn", "diana", "hannah", "austin", "daniel", "troy"
         ]
         
         self._initialized = True
@@ -204,15 +209,29 @@ class GroqTTSModel:
     ) -> bytes:
         """Generate audio using Groq API."""
         try:
-            # Validate and set voice
-            voice = voice or settings.groq_voice
-            if voice not in self.english_voices + self.arabic_voices:
-                logger.warning(f"Unknown voice {voice}, using default {settings.groq_voice}")
-                voice = settings.groq_voice
-            
-            # Determine model based on voice
+            # Determine model
             model = settings.groq_model
-            if voice in self.arabic_voices:
+            
+            # Get the appropriate voice list based on the model
+            if "orpheus" in model.lower():
+                available_voices = self.orpheus_voices
+                default_voice = "autumn"  # Default Orpheus voice
+            elif "arabic" in model.lower():
+                available_voices = self.playai_arabic_voices
+                default_voice = settings.groq_voice
+            else:
+                available_voices = self.playai_english_voices + self.playai_arabic_voices
+                default_voice = settings.groq_voice
+            
+            # Validate and set voice
+            voice = voice or default_voice
+            if voice not in available_voices:
+                logger.warning(f"Unknown voice '{voice}' for model '{model}'. Available voices: {available_voices}")
+                logger.warning(f"Using default voice: {default_voice}")
+                voice = default_voice
+            
+            # Set model for Arabic PlayAI voices
+            if voice in self.playai_arabic_voices:
                 model = "playai-tts-arabic"
             
             # Truncate text if too long (Groq has 10K character limit)
@@ -230,7 +249,8 @@ class GroqTTSModel:
                     model=model,
                     voice=voice,
                     input=text,
-                    response_format="wav"
+                    response_format="wav",
+                    speed=settings.speech_speed
                 )
             )
             
@@ -300,7 +320,11 @@ class GroqTTSModel:
     def get_supported_voices(self) -> List[str]:
         """Get list of supported voices."""
         if self.use_groq and self.groq_client:
-            return self.english_voices + self.arabic_voices
+            model = settings.groq_model
+            if "orpheus" in model.lower():
+                return self.orpheus_voices
+            else:
+                return self.playai_english_voices + self.playai_arabic_voices
         else:
             return ["tara"]  # Local model default
     

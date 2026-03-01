@@ -111,14 +111,17 @@ The service will start on `http://localhost:8000`
 
 ## Available Voices
 
-### English Voices
+### Orpheus Model Voices (canopylabs/orpheus-v1-english)
+- **autumn** (default), diana, hannah, austin, daniel, troy
+
+### PlayAI English Voices (playai-tts)
 - Arista-PlayAI, Atlas-PlayAI, Basil-PlayAI, Briggs-PlayAI
 - Calum-PlayAI, Celeste-PlayAI, Cheyenne-PlayAI, Chip-PlayAI
-- Cillian-PlayAI, Deedee-PlayAI, **Fritz-PlayAI** (default), Gail-PlayAI
+- Cillian-PlayAI, Deedee-PlayAI, Fritz-PlayAI, Gail-PlayAI
 - Indigo-PlayAI, Mamaw-PlayAI, Mason-PlayAI, Mikail-PlayAI
 - Mitch-PlayAI, Quinn-PlayAI, Thunder-PlayAI
 
-### Arabic Voices  
+### PlayAI Arabic Voices (playai-tts-arabic)
 - Ahmad-PlayAI, Amira-PlayAI, Khalid-PlayAI, Nasser-PlayAI
 
 ## WebSocket Protocol
@@ -262,8 +265,8 @@ Environment variables (all optional with sensible defaults):
 | `TTS_PORT` | `8000` | Server port |
 | `TTS_DEBUG` | `false` | Enable debug logging |
 | `TTS_USE_GROQ` | `true` | Use Groq API (vs local model) |
-| `TTS_GROQ_MODEL` | `playai-tts` | Groq TTS model name |
-| `TTS_GROQ_VOICE` | `Fritz-PlayAI` | Default voice |
+| `TTS_GROQ_MODEL` | `canopylabs/orpheus-v1-english` | Groq TTS model name |
+| `TTS_GROQ_VOICE` | `autumn` | Default voice |
 | `TTS_MAX_CONCURRENT_CONNECTIONS` | `10` | Max concurrent WebSocket clients |
 | `TTS_MAX_TEXT_LENGTH` | `9000` | Max characters per request |
 | `TTS_CHUNK_SIZE` | `200` | Characters per text chunk |

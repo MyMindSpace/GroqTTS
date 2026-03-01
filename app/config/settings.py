@@ -67,11 +67,11 @@ class Settings:
     
     @property
     def groq_model(self) -> str:
-        return self.get('TTS_GROQ_MODEL', 'playai-tts')
+        return self.get('TTS_GROQ_MODEL', 'canopylabs/orpheus-v1-english')
     
     @property
     def groq_voice(self) -> str:
-        return self.get('TTS_GROQ_VOICE', 'Fritz-PlayAI')
+        return self.get('TTS_GROQ_VOICE', 'autumn')
     
     @property
     def max_concurrent_connections(self) -> int:
@@ -88,6 +88,10 @@ class Settings:
     @property
     def chunk_size_words(self) -> int:
         return int(self.get('TTS_CHUNK_SIZE_WORDS', 15))
+    
+    @property
+    def speech_speed(self) -> float:
+        return float(self.get('TTS_SPEECH_SPEED', 1.0))
     
     # Legacy properties for backward compatibility
     @property
